@@ -1,0 +1,57 @@
+body {
+    background: #000000;
+    color: #ffffff;
+    text-align: center;
+}
+
+a {
+    color: orange;
+    font-weight: bold;
+}
+
+#status {
+    color: grey;
+    font-size: 80%;
+}
+
+.bad {
+    color: red;
+}
+
+.good {
+    color: green;
+}
+
+#info {
+    color: yellow;
+}
+
+#team {
+    height: 20px;
+}
+
+#board {
+    width: 158px;
+    margin: 0 auto;
+    padding: 50px;
+}
+
+#board table {
+    border-color: #ffffff;
+}
+
+#board table td {
+    width: 50px;
+    height: 50px;
+    font-family: Consolas;
+    font-size: 40px;
+}
+
+#board table td.cross {
+    color: orange;
+}
+
+#board table td:hover {
+    cursor: pointer;
+    background-color: #222222;
+}
