@@ -56,7 +56,7 @@ server.listen global.app.config.httpPort
 #static
 expressServer.use '/static/', express.static './public'
 
-expressServer.set 'views', './public'
+expressServer.set 'views', './public/views/'
 expressServer.set 'view engine', 'jade'
 
 expressServer.get "/", (req, res) ->
