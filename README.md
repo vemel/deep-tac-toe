@@ -6,6 +6,7 @@ using express, async and socket.io
 Main goal is to play tictactoe while playing tictactoe.
 
 Basic rules:
+
 1. To win this game you shoud conquer big field
 2. To conquer field (big or small) you can put three-in-a-row, or have
    five units in full field
@@ -14,7 +15,8 @@ Basic rules:
 4. If required field is full or your last turn was in that field, 
    you can make your step anywhere you want!
 
-TL;DR
+TL;DR:
+
 1. Strenght in numbers
 2. Conquer those small fields to win!
 3. Keep your opponent in bounds.
