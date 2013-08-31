@@ -21,9 +21,10 @@ Listeners =
           return next() if (!data.gameId? or !data.playerIndex?)
           oldGame = app.storage.findGame data.gameId
 
-          #if user has old uncompleted game - reconnect
+          #if user has old uncompleted game - finish it
           if oldGame
-            oldGame.reconnectPlayer(data.playerIndex, player)
+            # oldGame.reconnectPlayer(data.playerIndex, player)
+            oldGame.finish {reason: 'opponentLeaving', team: oldGame.players[data.playerIndex].team}, next
           else
             next()
           undefined
