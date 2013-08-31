@@ -6,7 +6,6 @@ function Game(){
     this.width = c_width;
     this.cells_x = 3;
     this.cells_y = 3;
-    this.paper = Raphael(0, 0, c_width, c_height);
     this.players = ["x", "o"];
     this.players_color = {x: "blue", o: "green"};
     this.players_last_fields = {};
@@ -15,8 +14,15 @@ function Game(){
 
 
 Game.prototype.init = function(){
+    var cont = $('#game_cont');
+    this.paper = Raphael(
+        cont.offset().left + parseInt(cont.css("border-left-width"), 10),
+        cont.offset().top + parseInt(cont.css("border-top-width"), 10),
+        cont.width(),
+        cont.height());
     this.won = false;
     this.curr_player = false;
+    this.lastTurn = false;
     this.field = [];
     this.field_lines = [];
     this.small_fields = [];
@@ -195,8 +201,9 @@ Game.prototype.makeTurn = function(x, y, x1, y1){
     next_player = this.players[(this.players.indexOf(this.player)+1) % this.players.length];
     this.checkWin(x, y);
     this.checkPossible(next_player, this.player);
-    this.player = next_player;
+    this.next_player = next_player;
     this.sendTurn(x, y, x1, y1);
+    this.player = next_player;
     this.draw();
 }
 
@@ -204,16 +211,25 @@ Game.prototype.sendTurn = function(x, y, x1, y1){
     return
 }
 
-Game.prototype.drawCell = function(x, y, x1, y1){
+Game.prototype.drawPossibleCell = function(x, y, x1, y1){
+    if (this.player != this.curr_player) return;
+    if (this.won) return;
     var value = this.small_fields[y][x][y1][x1];
     if (value == "p"){
-        if (this.player != this.curr_player) return;
+        // this.paper.circle(
+        //     this.width * x / this.cells_x + this.width * (x1 + 0.5) / this.cells_x / this.cells_x,
+        //     this.height * y / this.cells_y + this.height * (y1 + 0.5) / this.cells_y / this.cells_y,
+        //     this.width/this.cells_x/this.cells_x / 10)
+        // .attr({fill: this.players_color[this.player], "fill-opacity":0.5, "stroke-opacity": 0.0})
+
+        this.drawHighlight(x, y, x1, y1, this.players_color[this.player]);
+
         this.paper.rect(
             this.width * x / this.cells_x + this.width * x1 / this.cells_x / this.cells_x,
             this.height * y / this.cells_y + this.height * y1 / this.cells_y / this.cells_y,
             this.width/this.cells_x/this.cells_x,
             this.height/this.cells_y/this.cells_y)
-        .attr({fill: this.players_color[this.player], "fill-opacity":0.1, "stroke-opacity": 0.0})
+        .attr({fill: this.players_color[this.player], "fill-opacity":0.0, "stroke-opacity": 0.0})
         .data({x: x, y:y, x1:x1, y1:y1, game: this})
         .click(function(){
             var data = this.data();
@@ -221,6 +237,32 @@ Game.prototype.drawCell = function(x, y, x1, y1){
                 return;
             data.game.makeTurn(data.x, data.y, data.x1, data.y1);
         })
+        .hover(function(){
+            this.animate({"fill-opacity":0.2}, 300);
+        }, function(){
+            this.animate({"fill-opacity":0.0}, 300);
+        })
+    }
+
+}
+
+Game.prototype.drawHighlight = function(x, y, x1, y1, color){
+    this.paper.rect(
+        this.width * x / this.cells_x + this.width * x1 / this.cells_x / this.cells_x,
+        this.height * y / this.cells_y + this.height * y1 / this.cells_y / this.cells_y,
+        this.width/this.cells_x/this.cells_x,
+        this.height/this.cells_y/this.cells_y)
+    .attr({fill: color, "fill-opacity":0.05, "stroke-opacity": 0.0})
+}
+
+Game.prototype.drawCell = function(x, y, x1, y1){
+    var value = this.small_fields[y][x][y1][x1];
+    if (this.lastTurn){
+        if (this.lastTurn[1][0] == x && this.lastTurn[1][1] == y && this.lastTurn[1][2] == x1 && this.lastTurn[1][3] == y1){
+            var player_team = this.lastTurn[0];
+            console.log(player_team);
+            this.drawHighlight(x, y, x1, y1, this.players_color[player_team]);
+        }
     }
     if (value == "x"){
         this.drawX(
@@ -263,7 +305,7 @@ Game.prototype.draw = function(){
                     this.height * y / this.cells_y,
                     this.width/this.cells_x,
                     this.height/this.cells_y,
-                    {"opacity": 0.5, "stroke-width": 2}
+                    {"opacity": 0.5, "stroke-width": 4}
                 );
             }
 
@@ -273,7 +315,7 @@ Game.prototype.draw = function(){
                     this.height * y / this.cells_y,
                     this.width/this.cells_x,
                     this.height/this.cells_y,
-                    {"opacity": 0.5, "stroke-width": 2}
+                    {"opacity": 0.5, "stroke-width": 4}
                 );
             }
 
@@ -285,6 +327,14 @@ Game.prototype.draw = function(){
                     this.height/this.cells_y,
                     this.field_lines[y][x]
                 );
+            }
+
+            if (this.player == this.curr_player){
+                for (var y1=0; y1 < this.cells_y; y1++){
+                    for (var x1=0; x1 < this.cells_x; x1++){
+                        this.drawPossibleCell(x, y, x1, y1);
+                    }
+                }
             }
         }
     }
@@ -310,7 +360,7 @@ Game.prototype.drawWin = function(player, line){
 
 
 Game.prototype.drawBorder = function(x, y, w, h){
-    var border = this.paper.rect(x, y, w, h);
+    // var border = this.paper.rect(x, y, w, h);
 }
 
 Game.prototype.drawFieldLine = function(x, y, w, h, coords, attr){
@@ -369,18 +419,25 @@ Game.prototype.drawField = function(x, y, w, h){
 var game = new Game();
 
 
+var show_message = function(message){
+    $('#message_cont').find('.message').fadeOut(500, function(){ $(this).remove(); });
+    $('#message_cont').append('<div class="message">'+message+'</div>');
+    var message = $('#message_cont').find('.message:last');
+    message
+        .css({
+            'margin-top': '20px',
+            'margin-left': (message.parent().width() - message.width()) / 2
+        })
+        .animate({'margin-top': '0px'}, 500);
+}
+
+
 // Generated by CoffeeScript 1.4.0
 var start_game_network = function(){
-    socket = io.connect(appConfig.httpHost);
-    console.log('Connecting to server...');
+    socket = io.connect(window.location.origin.split('/')[2].split(':')[0]);
+    // show_message('Connecting to server...');
     socket.on('connect', function() {
         Game.prototype.sendTurn = function(x, y, x1, y1){
-            console.log({
-              x: x,
-              y: y,
-              x1: x1,
-              y1: y1,
-            })
             return socket.emit('turn', {
               x: x,
               y: y,
@@ -390,22 +447,21 @@ var start_game_network = function(){
         };
 
         socket.emit('startGame');
-        console.log('Trying to create new game...');
+        // show_message('Trying to create new game...');
     });
 
     socket.on('waitingForOpponent', function() {
-        console.log('Waiting for opponent...');
+        show_message('Waiting for opponent...');
     });
 
     socket.on('gameStarted', function(data) {
-        console.log("You are playing for " + game.curr_player);
-        console.log('Game started');
+        show_message("You are playing for " + game.curr_player);
+        // show_message('Game started');
         game.init();
         game.curr_player = data.team;
     });
 
     socket.on('gameStateChanged', function(data) {
-      console.log(data);
       turnTeam = data.currentTeam;
       game.field = data.field;
       game.small_fields = data.small_fields;
@@ -413,20 +469,37 @@ var start_game_network = function(){
       game.players_turns = data.players_turns;
       game.won = data.won;
       game.player = data.currentTeam;
+      game.is_free_turn = data.is_free_turn;
+      game.lastTurn = data.last_turn;
+      console.log(data)
       game.draw();
-      console.log("Now is " + (game.curr_player === game.player ? 'your turn' : 'your opponent\'s turn'));
+
+      var turn_message = game.is_free_turn  && 'free turn' || 'turn';
+      var message = 'Now is your '+turn_message;
+      if (game.curr_player !== game.player){
+        message = 'Now is your opponent\'s ' + turn_message;
+      }
+
+      show_message(message);
     });
 
     socket.on('gameFinished', function(data) {
-      console.log(data);
+      show_message("Game finished");
     });
 };
 
 var start_game_hotseat = function(){
+    var announce_turn = function(){
+        show_message("Now is " + game.curr_player.toUpperCase() + " turn");
+    }
+
     Game.prototype.sendTurn = function(x, y, x1, y1){
-        this.curr_player = this.player;
+        this.curr_player = this.next_player;
+        this.lastTurn = [this.player, [x, y, x1, y1]];
+        announce_turn();
     };
     game.init();
     game.curr_player = game.player;
+    announce_turn();
     game.draw();
 };

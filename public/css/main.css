@@ -1,57 +1,25 @@
 body {
-    background: #000000;
-    color: #ffffff;
     text-align: center;
 }
 
-a {
-    color: orange;
-    font-weight: bold;
+#game_cont {
+    margin: 20px auto;
+    width: 500px;
+    height:500px;
+    border: 1px solid gray;
 }
 
-#status {
-    color: grey;
-    font-size: 80%;
+#message_cont {
+    margin: 20px auto;
+    width: 500px;
+    height:30px;
+    overflow: hidden;
 }
 
-.bad {
-    color: red;
-}
-
-.good {
-    color: green;
-}
-
-#info {
-    color: yellow;
-}
-
-#team {
-    height: 20px;
-}
-
-#board {
-    width: 158px;
-    margin: 0 auto;
-    padding: 50px;
-}
-
-#board table {
-    border-color: #ffffff;
-}
-
-#board table td {
-    width: 50px;
-    height: 50px;
-    font-family: Consolas;
-    font-size: 40px;
-}
-
-#board table td.cross {
-    color: orange;
-}
-
-#board table td:hover {
-    cursor: pointer;
-    background-color: #222222;
+#message_cont .message {
+    position:absolute;
+    text-align: center;
+    margin: 0px auto;
+    font-size:150%;
+    color:green;
 }

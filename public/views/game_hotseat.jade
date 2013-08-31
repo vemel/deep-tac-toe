@@ -1,11 +1,15 @@
 html
   head
     title Deep-tac-toe
+    link(rel='stylesheet', href='/static/css/main.css')
     script(type='text/javascript', src='/static/js/config.js')
     script(type='text/javascript', src='/static/js/raphael.js')
     script(type='text/javascript', src='/static/js/jquery.js')
     script(type='text/javascript', src='/socket.io/socket.io.js')
-  body
+  body(style='text-align:center')
+    h2 Deep-tac-toe
+    div(id='game_cont')
+    div(id='message_cont')
     script(src='/static/js/xo.js')
     script.
       start_game_hotseat();
