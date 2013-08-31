@@ -2,7 +2,7 @@
 
   module.exports = {
     httpPort : 80,
-    httpHost : 'volshebnyi-node-tictactoe-3d.jit.su'
+    httpHost : 'deep-tac-toe.jit.su'
   };
 
 }).call(this);
