@@ -19,6 +19,7 @@ class Game
     @won = false;
     @player = undefined;
     @players_turns = {};
+    @last_turn = undefined;
 
     @init()
 
@@ -84,6 +85,7 @@ class Game
 
   init: ->
     @won = false
+    @last_turn = undefined;
     @field = []
     @field_lines = [];
     @small_fields = [];
@@ -102,7 +104,7 @@ class Game
 
   makeTurn: (x, y, x1, y1) ->
     prev_player = @players[((@players.indexOf @player) - 1 + @players.length) % @players.length]
-    @checkPossible(@player.team, prev_player.team)
+    @checkPossible(@player, prev_player)
     if @small_fields[y][x][y1][x1] != "p"
       return
 
@@ -110,7 +112,9 @@ class Game
     @players_turns[@player.team].push [x, y, x1, y1]
     next_player = @players[((@players.indexOf @player) + 1) % @players.length]
     @checkWin x, y
-    @checkPossible(next_player.team, @player.team)
+    @checkPossible(next_player, @player)
+    @last_turn = [@player.team, [x, y, x1, y1]]
+    
     @player = next_player
     @currentTeam = next_player.team
 
@@ -163,15 +167,17 @@ class Game
 
   checkPossible: (player, prev_player) ->
     last_turn = [-1, -1, -1, -1]
-    last_turn = @players_turns[player][@players_turns[player].length - 1]  if @players_turns[player].length
+    last_turn = @players_turns[player.team][@players_turns[player.team].length - 1]  if @players_turns[player.team].length
     opp_turn = [-1, -1, 0, 0]
-    opp_turn = @players_turns[prev_player][@players_turns[prev_player].length - 1] if @players_turns[prev_player].length
+    opp_turn = @players_turns[prev_player.team][@players_turns[prev_player.team].length - 1] if @players_turns[prev_player.team].length
     force_x = opp_turn[2]
     force_y = opp_turn[3]
     free_turn = false
     free_turn = true  if force_x is last_turn[0] and force_y is last_turn[1]
     free_turn = true  if @isFieldFull(@small_fields[force_x][force_y])
     free_turn = true  if opp_turn[0] < 0
+
+    player.is_free_turn = free_turn
 
     for y in [0...@cells_y]
       for x in [0...@cells_x]
@@ -237,7 +243,9 @@ class Game
       field_lines: @field_lines,
       players_turns: @players_turns,
       won: @won,
-      currentTeam: @player.team
+      currentTeam: @player.team,
+      is_free_turn: @player.is_free_turn,
+      last_turn: @last_turn
 
     for player in @players
       player.send 'gameStateChanged', data
